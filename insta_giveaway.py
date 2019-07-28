@@ -58,6 +58,7 @@ def fetch_all_comments(post_id):
 
 def get_users_from_comment(comment):
     username_pattern = r'(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)'
+    # This pattern was taken from: https://blog.jstassen.com/2016/03/code-regex-for-instagram-username-and-hashtags/ 
     users = re.findall(username_pattern, comment)
     return users
 
