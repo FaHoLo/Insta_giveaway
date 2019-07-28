@@ -38,11 +38,10 @@ def log_into_instagram():
 
 def find_users_with_true_comments(post_id):  
     comments = fetch_all_comments(post_id)
-    users_with_true_comments = []
+    users_with_true_comments = set()
     for user_id, username, comment in comments:
         user_friends = get_users_from_comment(comment)
-        if is_some_friend_exist(user_friends): users_with_true_comments.append((user_id, username))
-    users_with_true_comments = remove_duplicates_of_users(users_with_true_comments)
+        if is_some_friend_exist(user_friends): users_with_true_comments.add((user_id, username))
     return users_with_true_comments
 
 def fetch_all_comments(post_id):
@@ -69,10 +68,6 @@ def is_some_friend_exist(user_friends):
 def is_user_exist(username):
     user_id = bot.get_user_id_from_username(username)
     if user_id: return True
-
-def remove_duplicates_of_users(user_list):
-    set_of_users = set(user_list)
-    return set_of_users
 
 def check_users_for_like_and_follow(users, post_id, login):
     all_likes = bot.get_media_likers(post_id)
