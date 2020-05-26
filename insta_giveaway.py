@@ -1,9 +1,11 @@
+import argparse
 import os
 import re
-import argparse
 from pprint import pprint
+
 from dotenv import load_dotenv
 from instabot import Bot
+
 bot = Bot()
 
 
@@ -12,6 +14,7 @@ def main():
     post_url, login = parse_url_and_login()
     true_users = get_true_users(post_url, login)
     pprint(true_users)
+
 
 def parse_url_and_login():
     parser = argparse.ArgumentParser(
@@ -24,6 +27,7 @@ def parse_url_and_login():
     login = args.login
     return post_url, login
 
+
 def get_true_users(post_url, login):
     log_into_instagram()
     post_id = bot.get_media_id_from_link(post_url)
@@ -31,43 +35,53 @@ def get_true_users(post_url, login):
     true_users = check_users_for_like_and_follow(users_with_true_comments, post_id, login)
     return true_users
 
+
 def log_into_instagram():
     insta_login = os.getenv('INSTA_LOGIN')
     insta_password = os.getenv('INSTA_PASSWORD')
     bot.login(username=insta_login, password=insta_password)
 
-def find_users_with_true_comments(post_id):  
+
+def find_users_with_true_comments(post_id):
     comments = fetch_all_comments(post_id)
     users_with_true_comments = set()
     for user_id, username, comment in comments:
         user_friends = get_users_from_comment(comment)
-        if is_some_friend_exist(user_friends): users_with_true_comments.add((user_id, username))
+        if is_some_friend_exist(user_friends):
+            users_with_true_comments.add((user_id, username))
     return users_with_true_comments
+
 
 def fetch_all_comments(post_id):
     comments_info = bot.get_media_comments_all(post_id)
     comments = []
     for comment in comments_info:
         comments.append((
-            comment['user_id'], 
-            comment['user']['username'], 
+            comment['user_id'],
+            comment['user']['username'],
             comment['text'],
         ))
     return comments
 
+
 def get_users_from_comment(comment):
     username_pattern = r'(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)'
-    # This pattern was taken from: https://blog.jstassen.com/2016/03/code-regex-for-instagram-username-and-hashtags/ 
+    # This pattern was taken from: https://blog.jstassen.com/2016/03/code-regex-for-instagram-username-and-hashtags/
     users = re.findall(username_pattern, comment)
     return users
 
+
 def is_some_friend_exist(user_friends):
     for friend in user_friends:
-        if is_user_exist(friend): return True 
+        if is_user_exist(friend):
+            return True
+
 
 def is_user_exist(username):
     user_id = bot.get_user_id_from_username(username)
-    if user_id: return True
+    if user_id:
+        return True
+
 
 def check_users_for_like_and_follow(users, post_id, login):
     all_likes = bot.get_media_likers(post_id)
@@ -79,6 +93,7 @@ def check_users_for_like_and_follow(users, post_id, login):
         if user_id in all_likes and user_id in all_followers:
             true_users.append((user_id, username))
     return true_users
+
 
 if __name__ == '__main__':
     main()
